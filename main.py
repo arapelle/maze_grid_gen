@@ -1,6 +1,7 @@
 import random
 
 from grid import Grid
+from neighborhood import ortho_positions_in_grid, square_positions_in_grid
 from vec2 import Vec2
 
 #
@@ -9,36 +10,25 @@ def random_positions(grid: Grid, n: int):
     square_indexes = list(range(grid.width * grid.height))
     assert n <= len(square_indexes)
     for i in range(n):
-        idx = random.choice(range(len(square_indexes)))
-        square_index = square_indexes[idx]
-        print(square_indexes)
-        print(square_index)
-        del square_indexes[idx] # < Là on supprime directement le square_index déterminé par idx
-        print(square_indexes)
-        square_positions.append(grid.index_to_pos(square_index))
-    #...
-    square_indexes = list(range(grid.width * grid.height))
-    square_index = random.choice(square_indexes)
-    print(square_indexes)
-    print(square_index)
-    square_indexes.remove(square_index) # < On doit parcourir toute la liste pour supprimer le square_index
-    print(square_indexes)
+        sq_index = random.choice(square_indexes)
+        sq_pos = grid.index_to_pos(sq_index)
+        area_positions = square_positions_in_grid(grid, sq_pos, 1)
+        for pos in area_positions:
+            idx = grid.pos_to_index(pos)
+            if idx in square_indexes:
+                square_indexes.remove(idx)
+        square_positions.append(sq_pos)
     return square_positions
 
 if __name__ == "__main__":
-    grid = Grid(Vec2(3, 2), ".")
-    positions = random_positions(grid, 2)
-    print(f"{positions}")
-    #-----
-    grid = Grid(Vec2(12, 6), ".")
     rng_seed = random.randint(0, 100)
     print(f"seed: {rng_seed}")
     random.seed(rng_seed)
-    indexes = list(range(grid.width * grid.height))
-    nb_root_obstacles = 10
-    chosen_indexes = sorted(random.choices(indexes, k=nb_root_obstacles))
-    print(chosen_indexes)
-    for index in chosen_indexes:
-        pos = grid.index_to_pos(index)
-        grid[pos] = "#"
+    #-----
+    grid = Grid(Vec2(10, 10), "[ ]")
+    nb_root_obstacles = 12
+    positions = random_positions(grid, nb_root_obstacles)
+    print(f"{positions}")
+    for pos in positions:
+        grid[pos] = "[#]"
     print(f"{grid}")
